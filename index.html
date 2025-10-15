@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mood Tracker</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background: transparent;
+        overflow: hidden;
+      }
+
+      .container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        color: white;
+      }
+
+      h2 {
+        margin-bottom: 20px;
+        font-size: 20px;
+        font-weight: 600;
+      }
+
+      .moods {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+
+      .mood-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 12px;
+        padding: 12px;
+        font-size: 32px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .mood-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.1);
+      }
+
+      .controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 16px;
+      }
+
+      button {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s;
+      }
+
+      button:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      select {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 8px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      select option {
+        background: #667eea;
+        color: white;
+      }
+
+      .settings {
+        display: none;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.3);
+      }
+
+      .settings.active {
+        display: block;
+      }
+
+      .setting-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      label {
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>How are you feeling?</h2>
+
+      <div class="moods">
+        <button class="mood-btn" onclick="saveMood('😊')">😊</button>
+        <button class="mood-btn" onclick="saveMood('😐')">😐</button>
+        <button class="mood-btn" onclick="saveMood('😔')">😔</button>
+        <button class="mood-btn" onclick="saveMood('😫')">😫</button>
+        <button class="mood-btn" onclick="saveMood('😴')">😴</button>
+      </div>
+
+      <div class="controls">
+        <button onclick="dismiss()">Dismiss</button>
+        <button onclick="toggleSettings()">⚙️ Settings</button>
+      </div>
+
+      <div class="settings" id="settings">
+        <div class="setting-row">
+          <label>Position:</label>
+          <select id="position" onchange="updateConfig()">
+            <option value="top-left">Top Left</option>
+            <option value="top-right">Top Right</option>
+            <option value="bottom-left">Bottom Left</option>
+            <option value="bottom-right">Bottom Right</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <label>Idle time (minutes):</label>
+          <select id="idleMinutes" onchange="updateConfig()">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const { ipcRenderer } = require("electron");
+
+      // load config when started
+      const config = ipcRenderer.sendSync("get-config");
+      document.getElementById("position").value = config.position;
+      document.getElementById("idleMinutes").value = config.idleMinutes;
+
+      function saveMood(mood) {
+        ipcRenderer.send("save-mood", mood);
+      }
+
+      function dismiss() {
+        ipcRenderer.send("dismiss");
+      }
+
+      function toggleSettings() {
+        document.getElementById("settings").classList.toggle("active");
+      }
+
+      function updateConfig() {
+        const config = {
+          position: document.getElementById("position").value,
+          idleMinutes: parseInt(document.getElementById("idleMinutes").value),
+        };
+        ipcRenderer.send("save-config", config);
+      }
+    </script>
+  </body>
+</html>
