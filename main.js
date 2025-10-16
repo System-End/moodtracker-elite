@@ -4,12 +4,16 @@ const {
   powerMonitor,
   ipcMain,
   screen,
+  Tray,
+  Menu,
+  globalShortcut,
 } = require("electron");
 const path = require("path");
 const fs = require("fs");
 const sqlite3 = require("sqlite3").verbose();
 
 let mainWindow;
+let tray;
 let db;
 const IDLE_THRESHOLD = 120; // seconds (2 minutes)
 const CONFIG_PATH = path.join(app.getPath("userData"), "config.json");
@@ -22,12 +26,13 @@ function initDatabase() {
     CREATE TABLE IF NOT EXISTS moods (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       mood TEXT NOT NULL,
+      note TEXT,
       timestamp INTEGER NOT NULL
     )
   `);
 }
 
-// Load or create config
+// Load/create config
 function loadConfig() {
   try {
     return JSON.parse(fs.readFileSync(CONFIG_PATH, "utf8"));
@@ -43,8 +48,8 @@ function saveConfig(config) {
 // Calculate window position based on config
 function getWindowPosition(position) {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-  const windowWidth = 350;
-  const windowHeight = 250;
+  const windowWidth = 400;
+  const windowHeight = 350;
   const padding = 20;
 
   const positions = {
@@ -65,8 +70,8 @@ function createWindow() {
   const position = getWindowPosition(config.position);
 
   mainWindow = new BrowserWindow({
-    width: 350,
-    height: 250,
+    width: 400,
+    height: 350,
     x: position.x,
     y: position.y,
     frame: false,
@@ -84,6 +89,57 @@ function createWindow() {
   mainWindow.loadFile("index.html");
 }
 
+// Create system tray icon
+function createTray() {
+  // Create a simple icon
+  const iconPath = path.join(__dirname, "icon.png");
+
+  // For testing
+  tray = new Tray(createDefaultIcon());
+
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: "Log Mood",
+      click: () => mainWindow.show(),
+    },
+    {
+      label: "View History",
+      click: () => {
+        mainWindow.webContents.send("show-history");
+        mainWindow.show();
+      },
+    },
+    { type: "separator" },
+    {
+      label: "Quit",
+      click: () => app.quit(),
+    },
+  ]);
+
+  tray.setToolTip("Mood Tracker");
+  tray.setContextMenu(contextMenu);
+
+  // Double click to open
+  tray.on("double-click", () => {
+    mainWindow.show();
+  });
+}
+
+// Create a simple icon for testing
+function createDefaultIcon() {
+  const { nativeImage } = require("electron");
+  const canvas = require("canvas");
+  const canvasObj = canvas.createCanvas(16, 16);
+  const ctx = canvasObj.getContext("2d");
+
+  ctx.fillStyle = "#667eea";
+  ctx.beginPath();
+  ctx.arc(8, 8, 7, 0, Math.PI * 2);
+  ctx.fill();
+
+  return nativeImage.createFromDataURL(canvasObj.toDataURL());
+}
+
 // Check for idle state
 function checkIdleState() {
   const idleTime = powerMonitor.getSystemIdleTime();
@@ -98,6 +154,13 @@ function checkIdleState() {
 app.whenReady().then(() => {
   initDatabase();
   createWindow();
+  createTray();
+
+  // Testing shortcutw
+  globalShortcut.register("CommandOrControl+Shift+M", () => {
+    console.log("Manual trigger - showing window");
+    mainWindow.show();
+  });
 
   // Check idle state every 30 seconds
   setInterval(checkIdleState, 30000);
@@ -109,17 +172,21 @@ app.whenReady().then(() => {
   });
 });
 
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
+app.on("window-all-closed", (e) => {
+  // Prevent quit - keep running in tray
+  e.preventDefault();
+});
+
+app.on("before-quit", () => {
+  globalShortcut.unregisterAll();
 });
 
 // IPC handlers
-ipcMain.on("save-mood", (event, mood) => {
+ipcMain.on("save-mood", (event, data) => {
+  const { mood, note } = data;
   db.run(
-    "INSERT INTO moods (mood, timestamp) VALUES (?, ?)",
-    [mood, Date.now()],
+    "INSERT INTO moods (mood, note, timestamp) VALUES (?, ?, ?)",
+    [mood, note || null, Date.now()],
     (err) => {
       if (err) console.error(err);
       mainWindow.hide();
@@ -141,7 +208,7 @@ ipcMain.on("save-config", (event, config) => {
   mainWindow.setPosition(position.x, position.y);
 });
 
-ipcMain.on("get-moods", (event, days = 7) => {
+ipcMain.on("get-moods", (event, days = 30) => {
   const since = Date.now() - days * 24 * 60 * 60 * 1000;
   db.all(
     "SELECT * FROM moods WHERE timestamp > ? ORDER BY timestamp DESC",
