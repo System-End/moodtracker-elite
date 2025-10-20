@@ -7,57 +7,353 @@
   </head>
   <body>
     <div class="container">
-      <h2>How are you feeling?</h2>
-
-      <div class="moods">
-        <button class="mood-btn" onclick="saveMood('😊')">😊</button>
-        <button class="mood-btn" onclick="saveMood('😐')">😐</button>
-        <button class="mood-btn" onclick="saveMood('😔')">😔</button>
-        <button class="mood-btn" onclick="saveMood('😫')">😫</button>
-        <button class="mood-btn" onclick="saveMood('😴')">😴</button>
+      <div class="nav-tabs">
+        <div class="nav-tab active" onclick="showView('mood')">Log Mood</div>
+        <div class="nav-tab" onclick="showView('history')">History</div>
       </div>
 
-      <div class="controls">
-        <button onclick="dismiss()">Dismiss</button>
-        <button onclick="toggleSettings()">⚙️ Settings</button>
+      <!-- mood logging view -->
+      <div class="view active" id="mood-view">
+        <h2>How are you feeling?</h2>
+
+        <div class="mood-categories">
+          <div class="category-title">Happy</div>
+          <div class="mood-row">
+            <button class="mood-btn" onclick="selectMood('😊', 'good', this)">
+              <span>😊</span>
+              <span class="mood-label">good</span>
+            </button>
+            <button class="mood-btn" onclick="selectMood('😄', 'joyful', this)">
+              <span>😄</span>
+              <span class="mood-label">joyful</span>
+            </button>
+            <button class="mood-btn" onclick="selectMood('🥰', 'loved', this)">
+              <span>🥰</span>
+              <span class="mood-label">loved</span>
+            </button>
+            <button
+              class="mood-btn"
+              onclick="selectMood('😌', 'peaceful', this)"
+            >
+              <span>😌</span>
+              <span class="mood-label">peaceful</span>
+            </button>
+            <button
+              class="mood-btn"
+              onclick="selectMood('🤗', 'grateful', this)"
+            >
+              <span>🤗</span>
+              <span class="mood-label">grateful</span>
+            </button>
+          </div>
+
+          <div class="category-title">Calm</div>
+          <div class="mood-row">
+            <button
+              class="mood-btn"
+              onclick="selectMood('😐', 'neutral', this)"
+            >
+              <span>😐</span>
+              <span class="mood-label">neutral</span>
+            </button>
+            <button
+              class="mood-btn"
+              onclick="selectMood('🙂', 'content', this)"
+            >
+              <span>🙂</span>
+              <span class="mood-label">content</span>
+            </button>
+            <button class="mood-btn" onclick="selectMood('😶', 'blank', this)">
+              <span>😶</span>
+              <span class="mood-label">blank</span>
+            </button>
+            <button
+              class="mood-btn"
+              onclick="selectMood('🤔', 'thoughtful', this)"
+            >
+              <span>🤔</span>
+              <span class="mood-label">thinking</span>
+            </button>
+            <button class="mood-btn" onclick="selectMood('😴', 'sleepy', this)">
+              <span>😴</span>
+              <span class="mood-label">sleepy</span>
+            </button>
+          </div>
+
+          <div class="category-title">Sad</div>
+          <div class="mood-row">
+            <button class="mood-btn" onclick="selectMood('😔', 'down', this)">
+              <span>😔</span>
+              <span class="mood-label">down</span>
+            </button>
+            <button class="mood-btn" onclick="selectMood('😢', 'sad', this)">
+              <span>😢</span>
+              <span class="mood-label">sad</span>
+            </button>
+            <button
+              class="mood-btn"
+              onclick="selectMood('😞', 'disappointed', this)"
+            >
+              <span>😞</span>
+              <span class="mood-label">let down</span>
+            </button>
+            <button class="mood-btn" onclick="selectMood('😭', 'crying', this)">
+              <span>😭</span>
+              <span class="mood-label">crying</span>
+            </button>
+            <button class="mood-btn" onclick="selectMood('🥺', 'hurt', this)">
+              <span>🥺</span>
+              <span class="mood-label">hurt</span>
+            </button>
+          </div>
+
+          <div class="category-title">Anxious</div>
+          <div class="mood-row">
+            <button
+              class="mood-btn"
+              onclick="selectMood('😰', 'worried', this)"
+            >
+              <span>😰</span>
+              <span class="mood-label">worried</span>
+            </button>
+            <button
+              class="mood-btn"
+              onclick="selectMood('😨', 'anxious', this)"
+            >
+              <span>😨</span>
+              <span class="mood-label">anxious</span>
+            </button>
+            <button
+              class="mood-btn"
+              onclick="selectMood('😖', 'overwhelmed', this)"
+            >
+              <span>😖</span>
+              <span class="mood-label">stressed</span>
+            </button>
+            <button class="mood-btn" onclick="selectMood('😣', 'tense', this)">
+              <span>😣</span>
+              <span class="mood-label">tense</span>
+            </button>
+            <button
+              class="mood-btn"
+              onclick="selectMood('😓', 'exhausted', this)"
+            >
+              <span>😓</span>
+              <span class="mood-label">drained</span>
+            </button>
+          </div>
+
+          <div class="category-title">Angry</div>
+          <div class="mood-row">
+            <button
+              class="mood-btn"
+              onclick="selectMood('😠', 'annoyed', this)"
+            >
+              <span>😠</span>
+              <span class="mood-label">annoyed</span>
+            </button>
+            <button class="mood-btn" onclick="selectMood('😡', 'angry', this)">
+              <span>😡</span>
+              <span class="mood-label">angry</span>
+            </button>
+            <button
+              class="mood-btn"
+              onclick="selectMood('🤬', 'furious', this)"
+            >
+              <span>🤬</span>
+              <span class="mood-label">furious</span>
+            </button>
+            <button
+              class="mood-btn"
+              onclick="selectMood('😤', 'frustrated', this)"
+            >
+              <span>😤</span>
+              <span class="mood-label">frustrated</span>
+            </button>
+            <button
+              class="mood-btn"
+              onclick="selectMood('😒', 'irritated', this)"
+            >
+              <span>😒</span>
+              <span class="mood-label">irritated</span>
+            </button>
+          </div>
+
+          <div class="category-title">Excited</div>
+          <div class="mood-row">
+            <button class="mood-btn" onclick="selectMood('🤩', 'amazed', this)">
+              <span>🤩</span>
+              <span class="mood-label">amazed</span>
+            </button>
+            <button
+              class="mood-btn"
+              onclick="selectMood('😆', 'excited', this)"
+            >
+              <span>😆</span>
+              <span class="mood-label">excited</span>
+            </button>
+            <button
+              class="mood-btn"
+              onclick="selectMood('🥳', 'celebratory', this)"
+            >
+              <span>🥳</span>
+              <span class="mood-label">pumped</span>
+            </button>
+            <button
+              class="mood-btn"
+              onclick="selectMood('😎', 'confident', this)"
+            >
+              <span>😎</span>
+              <span class="mood-label">confident</span>
+            </button>
+            <button
+              class="mood-btn"
+              onclick="selectMood('🤓', 'focused', this)"
+            >
+              <span>🤓</span>
+              <span class="mood-label">focused</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- energy level slider -->
+        <div class="energy-section" id="energy-section">
+          <div class="energy-label">
+            <span>Energy Level</span>
+            <span id="energy-value">5</span>
+          </div>
+          <input
+            type="range"
+            min="1"
+            max="10"
+            class="energy-slider"
+            id="energy-slider"
+            oninput="updateEnergyValue()"
+          />
+        </div>
+
+        <!-- journal textarea -->
+        <div class="journal-section" id="journal-section">
+          <textarea
+            id="note"
+            placeholder="What's on your mind? (optional)"
+          ></textarea>
+        </div>
+
+        <div class="controls">
+          <button onclick="dismiss()">Dismiss</button>
+          <button class="primary" onclick="saveMood()" id="save-btn" disabled>
+            Save
+          </button>
+        </div>
+
+        <div class="settings" id="settings">
+          <div class="setting-row">
+            <label>Position:</label>
+            <select id="position" onchange="updateConfig()">
+              <option value="top-left">Top Left</option>
+              <option value="top-right">Top Right</option>
+              <option value="bottom-left">Bottom Left</option>
+              <option value="bottom-right">Bottom Right</option>
+            </select>
+          </div>
+          <div class="setting-row">
+            <label>Idle time (minutes):</label>
+            <select id="idleMinutes" onchange="updateConfig()">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="5">5</option>
+              <option value="10">10</option>
+            </select>
+          </div>
+          <button onclick="toggleSettings()">Close Settings</button>
+        </div>
+
+        <button
+          onclick="toggleSettings()"
+          style="margin-top: 12px; width: 100%"
+        >
+          ⚙️ Settings
+        </button>
       </div>
 
-      <div class="settings" id="settings">
-        <div class="setting-row">
-          <label>Position:</label>
-          <select id="position" onchange="updateConfig()">
-            <option value="top-left">Top Left</option>
-            <option value="top-right">Top Right</option>
-            <option value="bottom-left">Bottom Left</option>
-            <option value="bottom-right">Bottom Right</option>
-          </select>
+      <!-- history view -->
+      <div class="view" id="history-view">
+        <h2>Your Mood History</h2>
+
+        <div class="history-list" id="history-list">
+          <div class="no-history">Loading...</div>
         </div>
-        <div class="setting-row">
-          <label>Idle time (minutes):</label>
-          <select id="idleMinutes" onchange="updateConfig()">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="5">5</option>
-            <option value="10">10</option>
-          </select>
-        </div>
+
+        <button onclick="showView('mood')" style="width: 100%">← Back</button>
       </div>
     </div>
 
     <script>
       const { ipcRenderer } = require("electron");
 
-      // load config when started
+      let selectedMood = null;
+      let selectedMoodLabel = null;
+
+      // load saved config
       const config = ipcRenderer.sendSync("get-config");
       document.getElementById("position").value = config.position;
       document.getElementById("idleMinutes").value = config.idleMinutes;
 
-      function saveMood(mood) {
-        ipcRenderer.send("save-mood", mood);
+      function selectMood(emoji, label, btn) {
+        selectedMood = emoji;
+        selectedMoodLabel = label;
+
+        // clear previous selection
+        document
+          .querySelectorAll(".mood-btn")
+          .forEach((b) => b.classList.remove("selected"));
+        btn.classList.add("selected");
+
+        // show energy + journal sections
+        document.getElementById("energy-section").classList.add("active");
+        document.getElementById("journal-section").classList.add("active");
+        document.getElementById("save-btn").disabled = false;
+      }
+
+      function updateEnergyValue() {
+        const value = document.getElementById("energy-slider").value;
+        document.getElementById("energy-value").value = value;
+      }
+
+      function saveMood() {
+        if (!selectedMood) return;
+
+        const note = document.getElementById("note").value.trim();
+        const energy = parseInt(document.getElementById("energy-slider").value);
+
+        ipcRenderer.send("save-mood", {
+          mood: `${selectedMood} ${selectedMoodLabel}`,
+          energy,
+          note,
+        });
+
+        // reset form
+        resetForm();
       }
 
       function dismiss() {
         ipcRenderer.send("dismiss");
+        resetForm();
+      }
+
+      function resetForm() {
+        selectedMood = null;
+        selectedMoodLabel = null;
+        document.getElementById("note").value = "";
+        document.getElementById("energy-slider").value = 5;
+        document.getElementById("energy-value").textContent = "5";
+        document
+          .querySelectorAll(".mood-btn")
+          .forEach((b) => b.classList.remove("selected"));
+        document.getElementById("energy-section").classList.remove("active");
+        document.getElementById("journal-section").classList.remove("active");
+        document.getElementById("save-btn").disabled = true;
       }
 
       function toggleSettings() {
@@ -71,6 +367,74 @@
         };
         ipcRenderer.send("save-config", config);
       }
+
+      function showView(viewName) {
+        // update active tab
+        document
+          .querySelectorAll(".nav-tab")
+          .forEach((tab) => tab.classList.remove("active"));
+        event.target.classList.add("active");
+
+        // switch views
+        document
+          .querySelectorAll(".view")
+          .forEach((view) => view.classList.remove("active"));
+        document.getElementById(viewName + "-view").classList.add("active");
+
+        if (viewName === "history") {
+          loadHistory();
+        }
+      }
+
+      function loadHistory() {
+        ipcRenderer.send("get-moods", 30);
+      }
+
+      // render history items
+      ipcRenderer.on("moods-data", (event, moods) => {
+        const historyList = document.getElementById("history-list");
+
+        if (moods.length === 0) {
+          historyList.innerHTML =
+            '<div class="no-history">No entries yet. Start tracking!</div>';
+          return;
+        }
+
+        historyList.innerHTML = moods
+          .map((mood) => {
+            const date = new Date(mood.timestamp);
+            const timeStr =
+              date.toLocaleDateString() +
+              " " +
+              date.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+
+            return `
+          <div class="history-item">
+            <div class="history-header">
+              <div class="history-mood">
+                ${mood.mood}
+                ${
+                  mood.energy
+                    ? `<span class="history-energy">⚡ ${mood.energy}/10</span>`
+                    : ""
+                }
+              </div>
+              <span class="history-time">${timeStr}</span>
+            </div>
+            ${mood.note ? `<div class="history-note">${mood.note}</div>` : ""}
+          </div>
+        `;
+          })
+          .join("");
+      });
+
+      // handle tray menu click
+      ipcRenderer.on("show-history", () => {
+        showView("history");
+      });
     </script>
   </body>
 </html>

@@ -1,13 +1,22 @@
 {
   "name": "mood-tracker",
   "version": "1.0.0",
+  "description": "Desktop mood tracking app with idle detection",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "dev": "electron . --dev"
   },
+  "keywords": [
+    "mood",
+    "tracker",
+    "journal",
+    "electron"
+  ],
+  "author": "",
+  "license": "MIT",
   "dependencies": {
-    "electron": "^35.7.5",
-    "sqlite3": "^5.1.6",
-    "canvas": "^2.11.2"
+    "electron": "^28.0.0",
+    "sqlite3": "^5.1.6"
   }
 }
