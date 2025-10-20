@@ -15,24 +15,23 @@ const sqlite3 = require("sqlite3").verbose();
 let mainWindow;
 let tray;
 let db;
-const IDLE_THRESHOLD = 120; // seconds (2 minutes)
+const IDLE_THRESHOLD = 120; // TODO: change back to 120 for prod
 const CONFIG_PATH = path.join(app.getPath("userData"), "config.json");
 const DB_PATH = path.join(app.getPath("userData"), "moods.db");
 
-// Initialize database
 function initDatabase() {
   db = new sqlite3.Database(DB_PATH);
   db.run(`
     CREATE TABLE IF NOT EXISTS moods (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       mood TEXT NOT NULL,
+      energy INTEGER,
       note TEXT,
       timestamp INTEGER NOT NULL
     )
   `);
 }
 
-// Load/create config
 function loadConfig() {
   try {
     return JSON.parse(fs.readFileSync(CONFIG_PATH, "utf8"));
@@ -45,11 +44,10 @@ function saveConfig(config) {
   fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
 }
 
-// Calculate window position based on config
 function getWindowPosition(position) {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-  const windowWidth = 400;
-  const windowHeight = 350;
+  const windowWidth = 450;
+  const windowHeight = 550;
   const padding = 20;
 
   const positions = {
@@ -70,8 +68,8 @@ function createWindow() {
   const position = getWindowPosition(config.position);
 
   mainWindow = new BrowserWindow({
-    width: 400,
-    height: 350,
+    width: 450,
+    height: 550,
     x: position.x,
     y: position.y,
     frame: false,
@@ -89,12 +87,8 @@ function createWindow() {
   mainWindow.loadFile("index.html");
 }
 
-// Create system tray icon
 function createTray() {
-  // Create a simple icon
-  const iconPath = path.join(__dirname, "icon.png");
-
-  // For testing
+  // fallback icon - replace with actual icon.png in prod
   tray = new Tray(createDefaultIcon());
 
   const contextMenu = Menu.buildFromTemplate([
@@ -119,28 +113,21 @@ function createTray() {
   tray.setToolTip("Mood Tracker");
   tray.setContextMenu(contextMenu);
 
-  // Double click to open
   tray.on("double-click", () => {
     mainWindow.show();
   });
 }
 
-// Create a simple icon for testing
 function createDefaultIcon() {
   const { nativeImage } = require("electron");
-  const canvas = require("canvas");
-  const canvasObj = canvas.createCanvas(16, 16);
-  const ctx = canvasObj.getContext("2d");
 
-  ctx.fillStyle = "#667eea";
-  ctx.beginPath();
-  ctx.arc(8, 8, 7, 0, Math.PI * 2);
-  ctx.fill();
+  // simple 16x16 purple circle as base64 PNG
+  const iconData =
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAdgAAAHYBTnsmCAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAE3SURBVDiNpdI7S0JRHMDx3+WRD8pHZhAUFQRBDdHQ0NQc0hINLU1Bc0NzRB9BaGhoaQyRoqWGhqYgCHoQBEEQRGPYC1+ZXb2Xbl4qcODC/Z/fOZxz/keQJAnDMGAYBpIkIQgCer0e0WhU8TidTkVhNBolnU5Ld3f38nq9XgRBIJvNks/nlU6n0zidTuXz+ZQsy1xeXtLr9chkMvh8Pnw+H+VyWbm6uiKRSJBKpUgmk1QqFer1OtVqlUajQavVolwuK81mk3a7TafTodvt0uv16Pf7DAYDBu+Dh8mQYcgH2u02s9mM6XSKKIrMZjPm8zmLxYLlcsl4PGY0GimSJCGKIpPJhOFwyGAw4O3tTZFl+U9Zlvl8nyGfzyuKoqxRVVX0L9frrVar1W9UVWU+n/Pw+Mher4eqqmxsbPANK8aErL8MfjYAAAAASUVORK5CYII=";
 
-  return nativeImage.createFromDataURL(canvasObj.toDataURL());
+  return nativeImage.createFromDataURL(iconData);
 }
 
-// Check for idle state
 function checkIdleState() {
   const idleTime = powerMonitor.getSystemIdleTime();
   const config = loadConfig();
@@ -156,13 +143,13 @@ app.whenReady().then(() => {
   createWindow();
   createTray();
 
-  // Testing shortcutw
+  // dev shortcut
   globalShortcut.register("CommandOrControl+Shift+M", () => {
-    console.log("Manual trigger - showing window");
+    console.log("Manual trigger");
     mainWindow.show();
   });
 
-  // Check idle state every 30 seconds
+  // check every 30s
   setInterval(checkIdleState, 30000);
 
   app.on("activate", () => {
@@ -173,8 +160,7 @@ app.whenReady().then(() => {
 });
 
 app.on("window-all-closed", (e) => {
-  // Prevent quit - keep running in tray
-  e.preventDefault();
+  e.preventDefault(); // keep running in tray
 });
 
 app.on("before-quit", () => {
@@ -183,10 +169,10 @@ app.on("before-quit", () => {
 
 // IPC handlers
 ipcMain.on("save-mood", (event, data) => {
-  const { mood, note } = data;
+  const { mood, energy, note } = data;
   db.run(
-    "INSERT INTO moods (mood, note, timestamp) VALUES (?, ?, ?)",
-    [mood, note || null, Date.now()],
+    "INSERT INTO moods (mood, energy, note, timestamp) VALUES (?, ?, ?, ?)",
+    [mood, energy, note || null, Date.now()],
     (err) => {
       if (err) console.error(err);
       mainWindow.hide();
